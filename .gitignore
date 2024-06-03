@@ -1,0 +1,4 @@
+bin/
+*.req
+*.rsp
+*.gdb

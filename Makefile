@@ -13,6 +13,9 @@ SRC:=$(ROOT)/src/
 INCLUDE:=-I $(ROOT)/src -lntl -lgf2x -lgmp -pthread
 LIB:=$(SHA3_INCLUDE)
 
+INCLUDE_NOT_OPTIMIZED:=-I $(ROOT)/src -I/usr/local/ntl-not-optimized/include -pthread
+LIB_NOT_OPTIMIZED:=$(SHA3_INCLUDE) -L/usr/local/ntl-not-optimized/lib -lntl -lgf2x -lgmp
+
 MAIN_HQC:=$(ROOT)/src/main_hqc.cpp
 MAIN_KAT:=$(ROOT)/src/main_kat.c
 
@@ -23,14 +26,13 @@ LIB_OBJS:= fips202.o
 BIN:=bin
 BUILD:=bin/build
 
-
 folders:
 	@echo -e "\n### Creating folders\n"
 	mkdir -p $(BUILD)
 
 fips202.o: | folders
 	@/bin/echo -e "\n### Compiling fips202"
-	$(CPP) $(CFLAGS) -c $(SHA3_SRC) $(SHA3_INCLUDE) -o $(BUILD)/$@
+	$(CPP) $(CPP_FLAGS) -c $(SHA3_SRC) $(SHA3_INCLUDE) -o $(BUILD)/$@
 
 %.o: $(SRC)/%.cpp | folders
 	@/bin/echo -e "\n### Compiling $@"
@@ -52,6 +54,9 @@ hqc-128-verbose: $(HQC_OBJS_VERBOSE) $(LIB_OBJS) | folders
 	@echo -e "\n### Compiling hqc-128 (verbose mode)\n"
 	$(CPP) $(CPP_FLAGS) $(MAIN_HQC) $(addprefix $(BUILD)/, $^) $(INCLUDE) $(LIB) -D VERBOSE -o $(BIN)/$@
 
+hqc-128-ntl-not-optimized: $(HQC_OBJS) $(LIB_OBJS) | folders
+	@echo -e "\n### Compiling hqc-128 with NTL not optimized\n"
+	$(CPP) $(CPP_FLAGS) $(MAIN_HQC) $(addprefix $(BUILD)/, $^) $(INCLUDE_NOT_OPTIMIZED) $(LIB_NOT_OPTIMIZED) -o $(BIN)/$@
 
 clean:
 	rm -f PQCkemKAT_*

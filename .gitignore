@@ -2,3 +2,4 @@ bin/
 *.req
 *.rsp
 *.gdb
+.vscode

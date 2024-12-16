@@ -8,8 +8,10 @@
 
 #include "shake_prng.h"
 #include <stdint.h>
+#include <stdio.h>
 
 void vect_set_random_fixed_weight(seedexpander_state *ctx, uint64_t *v, uint16_t weight);
+void vect_set_random_fixed_weight_log(seedexpander_state *ctx, uint64_t *v, uint16_t weight, FILE *file);
 void vect_set_random(seedexpander_state *ctx, uint64_t *v);
 void vect_set_random_from_prng(uint64_t *v, uint32_t size_v);
 

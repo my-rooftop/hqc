@@ -9,6 +9,8 @@
 #include "parsing.h"
 #include "shake_prng.h"
 #include "code.h"
+#include "debug_utils.h"
+#include "excel_utils.h"
 #include "vector.h"
 #include <stdint.h>
 #ifdef VERBOSE
@@ -47,9 +49,13 @@ void hqc_pke_keygen(unsigned char* pk, unsigned char* sk) {
     seedexpander_init(&pk_seedexpander, pk_seed, SEED_BYTES); //404B
 
     // Compute secret key
-    vect_set_random_fixed_weight(&sk_seedexpander, x, PARAM_OMEGA);//1648B
-    vect_set_random_fixed_weight(&sk_seedexpander, y, PARAM_OMEGA);//1648B
-
+    FILE *file;
+    file = fopen("x_weight_index.csv", "a");
+    vect_set_random_fixed_weight_log(&sk_seedexpander, x, PARAM_OMEGA, file);//1648B
+    fclose(file);
+    file = fopen("y_weight_index.csv", "a");
+    vect_set_random_fixed_weight_log(&sk_seedexpander, y, PARAM_OMEGA, file);//1648B
+    fclose(file);
     // Compute public key
     vect_set_random(&pk_seedexpander, h); //2256B
     vect_mul(s, y, h); //2468B
@@ -104,12 +110,26 @@ void hqc_pke_encrypt(uint64_t *u, uint64_t *v, uint64_t *m, unsigned char *theta
     hqc_public_key_from_string(h, s, pk);
 
     // Generate r1, r2 and e
-    vect_set_random_fixed_weight(&seedexpander, r1, PARAM_OMEGA_R);
-    vect_set_random_fixed_weight(&seedexpander, r2, PARAM_OMEGA_R);
+    FILE *file;
+    file = fopen("r1_weight_index.csv", "a");
+    vect_set_random_fixed_weight_log(&seedexpander, r1, PARAM_OMEGA_R, file);
+    fclose(file);
+    file = fopen("r2_weight_index.csv", "a");
+    vect_set_random_fixed_weight_log(&seedexpander, r2, PARAM_OMEGA_R, file);
+    fclose(file);
     vect_set_random_fixed_weight(&seedexpander, e, PARAM_OMEGA_E);
 
     // Compute u = r1 + r2.h
     vect_mul(u, r2, h);
+    // Save r2 vector
+    save_vector_to_csv(r2, VEC_N_SIZE_64, "r2_bits.csv");
+
+    // Save h vector  
+    save_vector_to_csv(h, VEC_N_SIZE_64, "h_bits.csv");
+
+    // After multiplication, save result
+    save_vector_to_csv(u, VEC_N_SIZE_64, "r2h_result_bits.csv");
+    
     vect_add(u, r1, u, VEC_N_SIZE_64);
 
     // Compute v = m.G by encoding the message

@@ -25,11 +25,13 @@ int main() {
 	unsigned char key1[SHARED_SECRET_BYTES];
 	unsigned char key2[SHARED_SECRET_BYTES];
 
+
 	for (int i = 0; i < 1; i++) {
 		crypto_kem_keypair(pk, sk);
 		crypto_kem_enc(ct, key1, pk);
 		crypto_kem_dec(key2, ct, sk);
 	}
+
 
 	printf("\n\nsecret1: ");
 	for(int i = 0 ; i < SHARED_SECRET_BYTES ; ++i) printf("%x", key1[i]);
